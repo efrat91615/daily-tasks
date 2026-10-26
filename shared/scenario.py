@@ -177,14 +177,19 @@ def loc_report() -> dict:
                 else:
                     automatic.add(part)  # comment-only marker: Claude Code does it, no code
     sdk = {p: len(v) for p, v in sdk.items()}
+    # simulated_client.py is a test tool for runs without an API key, not part of the API version.
+    test_tools = {"simulated_client.py"}
     files = lambda folder: {p.name: len(code_lines(p)) for p in sorted(folder.glob("*.py"))
-                            if p.name != "__init__.py"}
+                            if p.name != "__init__.py" and p.name not in test_tools}
     return {
         "per_part": {p: {"api": api[p], "sdk": sdk[p],
                          "sdk_note": "automatic" if p in automatic and not sdk[p] else ""}
                      for p in PARTS},
+        "harness_total": {"api": sum(api.values()), "sdk": sum(sdk.values())},
         "api_files": {**{f"harness/{k}": v for k, v in files(harness).items()},
                       **files(ROOT / "API")},
+        "test_tools_not_counted": {f"API/{n}": len(code_lines(ROOT / "API" / n))
+                                   for n in sorted(test_tools) if (ROOT / "API" / n).exists()},
         "sdk_files": files(ROOT / "SDK"),
         "shared_files": {k: v for k, v in files(ROOT / "shared").items() if k != "scenario.py"},
         "counting_rule": "non-blank lines, excluding comments and docstrings; SDK per part = "

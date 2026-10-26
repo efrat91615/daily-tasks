@@ -14,7 +14,9 @@
 >   prefix-cache model). They are **not comparable** with the SDK's real numbers.
 > - The API's 13/13 shows that the harness carries out the scripted behavior correctly, not
 >   how the model would behave.
-> - Line counts are real for both versions.
+> - Line counts are real for both versions. The simulation helper is not counted.
+> - The compaction threshold was lowered from 30,000 to 2,400 for the simulated run only, so
+>   that compaction runs once.
 > - `results/api.json` is marked `"simulated": true`.
 >
 > **Real run, once a key is available:** one command, which runs the scenario twice and reports
@@ -57,16 +59,19 @@
 | Model calls | 18 _(scripted; includes 1 compaction call)_ | 18 |
 | Tool calls | 11 _(scripted)_ | 16 |
 | Cost (USD) | $0.0897 _(from estimates, not comparable)_ | $0.1075 |
-| Wall time | 1.3 s _(no model latency, not comparable)_ | 55.3 s |
+| Wall time | 1.4 s _(no model latency, not comparable)_ | 55.3 s |
 | Checks passed | 13/13 _(scripted behavior, see note)_ | 13/13 |
 
 The SDK costs come from `total_cost_usd`. The SDK ran on my Claude Code login, so this is the
 cost Claude Code reports, not money charged to an API key. The SDK totals also include Claude
 Code's own `claude-haiku-5-5` calls (see section 3).
 
-In the simulation, compaction was forced once (threshold lowered from 30,000 to 2,400 estimated
-tokens, triggering before s1-5) so `compaction.py` runs. A real run of this scenario stays far
-below 30,000 tokens and would not compact.
+**Compaction threshold: lowered to 2,400 for the simulated run only.** The harness default
+(`COMPACT_THRESHOLD` in `API/agent.py`) is 30,000 prompt tokens, and a real API run uses that
+value. A run of this scenario stays far below 30,000 and would not compact. In the simulation
+the threshold was set to 2,400 estimated tokens (`SIMULATED_COMPACT_THRESHOLD` in `API/main.py`),
+so `compaction.py` runs once, before s1-5. `results/api.json` records the value used as
+`compact_threshold`.
 
 ### Per turn
 
@@ -109,10 +114,16 @@ line counts the whole function.
 | tokens | 44 | 34 | Claude Code reports running totals across several models, so per-turn numbers need almost as much code as `tokens.py` |
 | **Total** | **232** | **58** | |
 
-Glue code outside the parts: API `agent.py` 35 + `main.py` 92 + `harness/log.py` 2 (plus
-`simulated_client.py` 137, used only for the simulated run and not part of the harness); SDK
-`agent.py` 106 + `main.py` 123 + `tools.py` 17 (these include the marked lines above).
-`shared/` (domain code, identical for both) totals 312 lines, not counting the scenario runner.
+The API total covers only the 8 files in `API/harness/`.
+
+**Glue code outside the parts:**
+- API: `agent.py` 35 + `main.py` 92 + `harness/log.py` 2.
+- SDK: `agent.py` 106 + `main.py` 123 + `tools.py` 17. These include the marked lines above.
+- `shared/` (domain code, identical for both): 312 lines, not counting the scenario runner.
+
+**Not counted anywhere:** `API/simulated_client.py` (137 lines). It is a test tool for the
+simulated run without an API key, not part of the API harness or its glue code. `results/api.json`
+lists it separately under `loc.test_tools_not_counted`.
 
 ## 3. Where did the SDK use more tokens, where fewer, and why?
 

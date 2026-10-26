@@ -98,3 +98,7 @@ def test_loc_report_counts_parts():
     assert all(v["api"] > 0 for v in loc["per_part"].values())
     assert loc["per_part"]["tools"]["sdk"] > 0  # marked code lines in SDK/tools.py
     assert loc["per_part"]["compaction"]["sdk_note"] == "automatic"
+    # The simulation helper is a test tool: listed separately, never in the API counts.
+    assert not any("simulated_client" in k for k in loc["api_files"])
+    assert "API/simulated_client.py" in loc["test_tools_not_counted"]
+    assert loc["harness_total"]["api"] == sum(v["api"] for v in loc["per_part"].values())

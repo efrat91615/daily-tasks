@@ -7,7 +7,7 @@
   "compact_threshold": 2400,
   "scenario": "Third-year student: assignment, exam prep around Shabbat, morning workouts",
   "today": "2026-10-28",
-  "started": "2026-10-25T20:57:38",
+  "started": "2026-10-26T14:15:56",
   "libraries": {
     "anthropic": "2.3.0",
     "requests": "2.34.2",
@@ -29,7 +29,7 @@
         "add_task"
       ],
       "cost_usd": 0.016418,
-      "seconds": 0.07
+      "seconds": 0.06
     },
     {
       "session": "s1",
@@ -46,7 +46,7 @@
         "save_preference"
       ],
       "cost_usd": 0.009511,
-      "seconds": 0.11
+      "seconds": 0.06
     },
     {
       "session": "s1",
@@ -63,7 +63,7 @@
         "add_task"
       ],
       "cost_usd": 0.013843,
-      "seconds": 0.98
+      "seconds": 1.12
     },
     {
       "session": "s1",
@@ -79,7 +79,7 @@
         "add_task"
       ],
       "cost_usd": 0.008963,
-      "seconds": 0.02
+      "seconds": 0.03
     },
     {
       "session": "s1",
@@ -112,7 +112,7 @@
         "list_tasks"
       ],
       "cost_usd": 0.008444,
-      "seconds": 0.01
+      "seconds": 0.02
     },
     {
       "session": "s2",
@@ -142,7 +142,7 @@
         "add_task"
       ],
       "cost_usd": 0.008877,
-      "seconds": 0.04
+      "seconds": 0.05
     }
   ],
   "totals": {
@@ -152,7 +152,7 @@
     "output": 3196,
     "model_calls": 18,
     "cost_usd": 0.089697,
-    "seconds": 1.27,
+    "seconds": 1.38,
     "cache_hit_pct": 86.4,
     "tool_calls": 11
   },
@@ -280,6 +280,10 @@
         "sdk_note": ""
       }
     },
+    "harness_total": {
+      "api": 232,
+      "sdk": 58
+    },
     "api_files": {
       "harness/caching.py": 14,
       "harness/compaction.py": 33,
@@ -291,8 +295,10 @@
       "harness/tokens.py": 44,
       "harness/tools.py": 26,
       "agent.py": 35,
-      "main.py": 92,
-      "simulated_client.py": 137
+      "main.py": 92
+    },
+    "test_tools_not_counted": {
+      "API/simulated_client.py": 137
     },
     "sdk_files": {
       "agent.py": 106,
@@ -367,13 +373,13 @@
         "id": 1,
         "text": "Workouts only in the morning, before 9:00",
         "category": "fitness",
-        "saved_at": "2026-10-25T20:57:38"
+        "saved_at": "2026-10-26T14:15:56"
       },
       {
         "id": 2,
         "text": "No studying after 22:00",
         "category": "study",
-        "saved_at": "2026-10-25T20:57:38"
+        "saved_at": "2026-10-26T14:15:57"
       }
     ]
   }
