@@ -2,20 +2,28 @@
 
 Authors: נחמי אשלג, אפרת שטראוס
 
-> **The API run is SIMULATED. No real model calls were made.** I did not have an Anthropic API
-> key (the SDK version runs on my Claude Code login, the API version needs a separate key from
-> the Claude Console). To still run the API harness end to end, `API/simulated_client.py`
-> replaces the model with scripted responses, modelled on what the real model did in the SDK
-> run. Everything else ran for real:
-> - all 8 harness files (loop, tools, history, memory, context, compaction, caching, tokens);
-> - all shared tools, including the live Hebcal call;
-> - the file-name prints and the 13 checks.
+> **The API run is SIMULATED. No real model calls were made.**
 >
-> **What that means:**
-> - API token, cache and cost numbers are **estimates** (characters / 4, with a simple
->   prefix-cache model). They are **not comparable** with the SDK's real numbers.
-> - The API's 13/13 shows that the harness carries out the scripted behavior correctly, not
->   how the model would behave.
+> **Why:** a real API run requires a paid Anthropic API key, and we chose not to pay for one.
+> The SDK version runs on a Claude Code login at no extra cost, so its run is real.
+>
+> **What the simulation shows:** the API harness works end to end.
+> `API/simulated_client.py` replaces only the model, with scripted responses modelled on what
+> the real model did in the SDK run. Everything else ran for real:
+> - all 8 harness files (loop, tools, history, memory, context, compaction, caching, tokens),
+>   each printing its file name;
+> - all shared tools, including the live Hebcal call;
+> - all 13 scenario checks, which pass;
+> - the 52 offline tests, which pass.
+>
+> **What is missing:** real API numbers. We have no real API tokens, cache rate or cost, and no
+> real model behavior for the API version. **The numeric API vs SDK comparison therefore cannot
+> be made.** The API numbers in the tables are estimates that illustrate the harness mechanics
+> only:
+> - Tokens are counted as characters / 4, with a simple prefix-cache model.
+> - The tool calls are scripted, not model decisions.
+> - The API's 13/13 shows that the harness carries out the scripted behavior correctly, not how
+>   the model would behave.
 > - Line counts are real for both versions. The simulation helper is not counted.
 > - The compaction threshold was lowered from 30,000 to 2,400 for the simulated run only, so
 >   that compaction runs once.
@@ -55,6 +63,10 @@ Authors: נחמי אשלג, אפרת שטראוס
 
 ## 1. Results: API vs SDK
 
+**No numeric API vs SDK comparison is possible here.** The API run is simulated, because a real
+run requires a paid API key and we chose not to pay for one. Its token, cache and cost numbers
+are estimates and its tool calls are scripted. Only the SDK column holds real measurements.
+
 | Metric | API (**simulated**) | SDK (real, warm cache) |
 |---|---|---|
 | Input tokens (uncached) | 829 _(est., not comparable)_ | 2,461 |
@@ -68,7 +80,7 @@ Authors: נחמי אשלג, אפרת שטראוס
 | Wall time | 1.4 s _(no model latency, not comparable)_ | 55.3 s |
 | Checks passed | 13/13 _(scripted behavior, see note)_ | 13/13 |
 
-The SDK costs come from `total_cost_usd`. The SDK ran on my Claude Code login, so this is the
+The SDK costs come from `total_cost_usd`. The SDK ran on a personal Claude Code login, so this is the
 cost Claude Code reports, not money charged to an API key. The SDK totals also include Claude
 Code's own `claude-haiku-5-5` calls (see section 3).
 
@@ -82,6 +94,7 @@ so `compaction.py` runs once, before s1-5. `results/api.json` records the value 
 ### Per turn
 
 API columns are **simulated** (scripted tool calls, estimated tokens). SDK columns are real.
+As in the table above, the two sides cannot be compared turn by turn.
 
 | Turn | Request | API* in / cache read / cache write / out | API* calls | API* tools | SDK in / cache read / cache write / out | SDK calls | SDK $ | SDK s | SDK tools |
 |---|---|---|---|---|---|---|---|---|---|
@@ -133,46 +146,50 @@ lists it separately under `loc.test_tools_not_counted`.
 
 ## 3. Where did the SDK use more tokens, where fewer, and why?
 
-**TODO (author).** Because the API run is simulated, its token numbers cannot answer this
-question. A real comparison needs the real API run (`--warm`, see the top note). Facts
-collected on the SDK side:
+**The numeric comparison is not available.** Answering this question needs real API numbers:
+tokens, cache rate, cost and model behavior. Our API run is simulated, because a real run
+requires a paid API key and we chose not to pay for one. With a key, the single command in
+the top note (`--warm`) would produce those numbers. The findings below are from the real SDK
+run.
 
 - **Prompt per call.** Each Opus call in the SDK read about 3-5k prompt tokens: system
   prompt + 6 tool schemas + `CLAUDE.md` + Claude Code's own additions (s2-2, a single call,
-  read 3,230 tokens). The API version's real first-call prompt size: _pending a real run_.
+  read 3,230 tokens). The API version's real prompt size per call is not available (simulated
+  run).
 - **Extra model.** Claude Code adds one `claude-haiku-5-5` call on the first turn of every new
   session (about 1.2k input, 25-588 output, under $0.0005). It runs outside the conversation
   stream (no `AssistantMessage`), so it is a background helper, not a fallback.
 - **Context strategy.** In s1-1 the SDK agent called `list_tasks` and `get_jewish_calendar`
   before adding tasks. In the SDK the model has to fetch tasks itself. The API version pushes
   today's tasks and the relevant preferences into each turn instead. Whether that saves model
-  calls: _pending a real run_ (the simulated API tool calls are hand-written).
+  calls cannot be measured from the simulated run, whose API tool calls are hand-written.
 - **Caching.** 91.5% of the SDK's prompt tokens were cache reads. Part of this comes from
   earlier runs (see "Cross-run caching" below), so this figure is not a pure property of the SDK.
 
-## 4. What control did I have in the API that I lost in the SDK?
+## 4. What control did we have in the API that we lost in the SDK?
 
-**TODO (author), to expand.** Observed so far:
+These points come from the real SDK runs and from the API code. None of them depends on API
+token numbers, so the simulated API run does not limit them.
 
 - **Injected context.** Claude Code added the machine's real date (2026-10-25) to the
   conversation as an `attachment` of type `date`, next to the pinned scenario date
-  (2026-10-28) in my system prompt. I could not turn this off. The agent still followed the
+  (2026-10-28) in our system prompt. We could not turn this off. The agent still followed the
   system prompt: in every reply, "tomorrow" was Thursday 2026-10-29. This was found by
   scanning Claude Code's transcript files; we cannot see the full request Claude Code sends,
   so other additions may exist.
 - **Extra model calls.** The Haiku calls above are made and billed without being requested.
-- **Caching and compaction.** In the API I choose the `cache_control` breakpoints and the
-  compaction threshold, and I can test compaction offline with a low threshold (a test does
-  this). In the SDK both are automatic and not configurable from the options I used.
+- **Caching and compaction.** In the API we choose the `cache_control` breakpoints and the
+  compaction threshold, and we can test compaction offline with a low threshold (a test does
+  this). In the SDK both are automatic and not configurable from the options we used.
 - **Usage reporting.** The API returns usage per call. The SDK returns running totals per
   connection across models, and `AssistantMessage.usage` undercounts output tokens (it is read
   mid-stream: 13 output tokens recorded vs 799 actual in s1-3). Getting correct per-turn numbers
   took 34 lines of code.
-- **Per-turn context.** In the API I decide exactly what each turn contains (today's tasks and
+- **Per-turn context.** In the API we decide exactly what each turn contains (today's tasks and
   only the preferences relevant to the message). In the SDK, `CLAUDE.md` is loaded once per
   session with all preferences, and anything else the model must fetch with tools.
 
-## 5. Which version would I choose for this agent, and why?
+## 5. Which version would we choose for this agent, and why?
 
 <div dir="rtl">
 
