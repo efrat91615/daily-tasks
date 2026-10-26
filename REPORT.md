@@ -1,5 +1,7 @@
 # Daily Task Manager: API vs SDK
 
+Authors: נחמי אשלג, אפרת שטראוס
+
 > **The API run is SIMULATED. No real model calls were made.** I did not have an Anthropic API
 > key (the SDK version runs on my Claude Code login, the API version needs a separate key from
 > the Claude Console). To still run the API harness end to end, `API/simulated_client.py`
@@ -24,7 +26,11 @@
 > `python API/main.py --scenario scenario.json --out results/api.json --warm`
 >
 > The SDK numbers are real, from run C (2026-10-25), which **ran with a warm prompt cache** (see
-> "Cross-run caching"). Section 5 is mine to write.
+> "Cross-run caching").
+>
+> The code and most of this report were written with Claude Code under our direction. We made
+> the design decisions (agent, tools, Hebcal, scenario, simulated API run) and wrote section 5
+> ourselves.
 
 ## Setup
 
@@ -170,15 +176,15 @@ collected on the SDK side:
 
 <div dir="rtl">
 
-**הייתי בוחרת בגרסת ה-API.**
+**היינו בוחרות בגרסת ה-API.**
 
-הסיבה העיקרית היא שליטה. בריצות ה-SDK ראיתי ש-Claude Code מקבל החלטות בעצמו: הוא הפעיל מודל נוסף (Haiku) שלא ביקשתי, והכניס לקונטקסט את התאריך האמיתי של המחשב, למרות שקבעתי תאריך אחר. בגרסת ה-API שום דבר לא נשלח למודל בלי שהקוד שלי שלח אותו, ואני יודעת בדיוק מה המודל רואה בכל תור.
+הסיבה העיקרית היא שליטה. בריצות ה-SDK ראינו ש-Claude Code מקבל החלטות בעצמו: הוא הפעיל מודל נוסף (Haiku) שלא ביקשנו, והכניס לקונטקסט את התאריך האמיתי של המחשב, למרות שקבענו תאריך אחר. בגרסת ה-API שום דבר לא נשלח למודל בלי שהקוד שלנו שלח אותו, ואנחנו יודעות בדיוק מה המודל רואה בכל תור.
 
-סיבה נוספת היא שאולי גם אחרים ישתמשו בסוכן. ה-SDK רץ על ה-login האישי שלי, ולכן הוא מתאים לשימוש אישי. API עם מפתח מאפשר לשתף את הסוכן.
+סיבה נוספת היא שאולי גם אחרים ישתמשו בסוכן. ה-SDK רץ על ה-login האישי שלנו, ולכן הוא מתאים לשימוש אישי. API עם מפתח מאפשר לשתף את הסוכן.
 
-הוויתור הוא בכמות הקוד: 232 שורות ב-harness של ה-API מול 58 ב-SDK, ואת compaction ו-caching צריך לכתוב ולתחזק בעצמי. אני מוכנה לשלם את המחיר הזה תמורת השליטה.
+הוויתור הוא בכמות הקוד: 232 שורות ב-harness של ה-API מול 58 ב-SDK, ואת compaction ו-caching צריך לכתוב ולתחזק בעצמנו. אנחנו מוכנות לשלם את המחיר הזה תמורת השליטה.
 
-אם הסוכן היה מיועד רק לי, או אם הייתי רוצה לבנות אב-טיפוס מהר, הייתי בוחרת ב-SDK. הוא עבר את כל 13 הבדיקות עם רבע מכמות הקוד, ורץ על המנוי בלי עלות נוספת.
+אם הסוכן היה מיועד רק לנו, או אם היינו רוצות לבנות אב-טיפוס מהר, היינו בוחרות ב-SDK. הוא עבר את כל 13 הבדיקות עם רבע מכמות הקוד, ורץ על המנוי בלי עלות נוספת.
 
 </div>
 
